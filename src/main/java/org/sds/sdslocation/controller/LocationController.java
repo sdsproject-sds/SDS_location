@@ -1,8 +1,11 @@
 package org.sds.sdslocation.controller;
 
+import com.sds.integration.commons.model.AbstractBaseApiResponse;
+import org.sds.sdslocation.exeption.SdsLocationException;
 import org.sds.sdslocation.model.PolygonRequest;
 import org.sds.sdslocation.model.RegionResponse;
 import org.sds.sdslocation.service.LocationServiceImpl;
+import org.springdoc.core.customizers.OpenApiBuilderCustomizer;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,14 +31,18 @@ public class LocationController {
      */
 
     @PostMapping(value = "/division")
-    public ResponseEntity<?> createDivision(@RequestBody PolygonRequest polygonRequest) {
+    public ResponseEntity<AbstractBaseApiResponse<String>> createDivision(@RequestBody PolygonRequest polygonRequest) {
         String res = "";
         try {
             res = locationService.createDivision(polygonRequest);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new SdsLocationException(e);
         }
-        return ResponseEntity.ok(res);
+        return ResponseEntity.ok(new ApiResponse<String>().success(
+                "200",
+                "Successfully created",
+                res
+        ));
     }
 
      /* Get  division Name
@@ -43,16 +50,23 @@ public class LocationController {
      */
 
     @GetMapping(value = "/division")
-    public ResponseEntity<?> getDivision(@RequestBody Map<String, Double> coordinates) {
+    public ResponseEntity<AbstractBaseApiResponse<RegionResponse>> getDivision(@RequestBody Map<String, Double> coordinates) {
 
         try {
             RegionResponse response = locationService.getDivision(coordinates.get("lon"), coordinates.get("lat"));
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok(new ApiResponse<RegionResponse>().success(
+                    "200",
+                    "Success",
+                    response
+            ));
         } catch (Exception e) {
-            return ResponseEntity.status(400).body(RegionResponse.builder().supported(false).build());
+            return ResponseEntity.status(400)
+                    .body(new ApiResponse<RegionResponse>().error(
+                            "400",
+                            "Failed to Fetch",
+                            e.getLocalizedMessage()
+                    ));
         }
-
-
     }
 
 
@@ -65,14 +79,18 @@ public class LocationController {
      */
 
     @PostMapping(value = "sub-division")
-    public ResponseEntity<?> createSubDivision(@RequestBody PolygonRequest polygonRequest) {
+    public ResponseEntity<AbstractBaseApiResponse<String>> createSubDivision(@RequestBody PolygonRequest polygonRequest) {
         String res = "";
         try {
             res = locationService.createSubDivision(polygonRequest);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new SdsLocationException(e);
         }
-        return ResponseEntity.ok(res);
+        return ResponseEntity.ok(new ApiResponse<String>().success(
+                "200",
+                "Success",
+                res
+        ));
     }
 
     /* Get sub division Name
@@ -80,13 +98,22 @@ public class LocationController {
      */
 
     @GetMapping(value = "sub-division")
-    public ResponseEntity<?> getSubDivision(@RequestBody Map<String, Double> coordinates) {
+    public ResponseEntity<AbstractBaseApiResponse<RegionResponse>> getSubDivision(@RequestBody Map<String, Double> coordinates) {
 
         try {
             RegionResponse response = locationService.getSubDivision(coordinates.get("lon"), coordinates.get("lat"));
-            return ResponseEntity.ok(response);
+            return ResponseEntity.ok(new ApiResponse<RegionResponse>().success(
+                    "200",
+                    "Success",
+                    response
+            ));
         } catch (Exception e) {
-            return ResponseEntity.status(400).body(RegionResponse.builder().supported(false).build());
+            return ResponseEntity.status(400).body(
+                    new ApiResponse<RegionResponse>().error(
+                            "400",
+                            "Fialed",
+                            e.getLocalizedMessage()
+                    ));
         }
 
 
