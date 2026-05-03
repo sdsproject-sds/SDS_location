@@ -5,7 +5,6 @@ import org.sds.sdslocation.exeption.SdsLocationException;
 import org.sds.sdslocation.model.PolygonRequest;
 import org.sds.sdslocation.model.RegionResponse;
 import org.sds.sdslocation.service.LocationServiceImpl;
-import org.springdoc.core.customizers.OpenApiBuilderCustomizer;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
