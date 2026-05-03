@@ -12,4 +12,7 @@ import lombok.*;
 @Getter
 @Builder
 public class ApiResponse<T> extends AbstractBaseApiResponse<T> {
+    public ApiResponse() {
+        super();
+    }
 }
