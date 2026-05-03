@@ -21,7 +21,7 @@ public class GlobalControllerAdvice {
     @ExceptionHandler(Exception.class)
     public ResponseEntity<AbstractBaseApiResponse<?>> handleValidationExceptions(Exception e) {
         var errorId = UUID.randomUUID().toString();
-        log.error("Exception occurred: {} {} ", errorId, e.getMessage(), e);
+        log.error("Exception occurred, Error Id: {} Error: {}", errorId, e.getMessage(), e);
         String errors = e.getMessage();
         return ResponseEntity.status(500).body(new ApiResponse<>().error("500",
                 "Internal Server Error",
@@ -34,7 +34,7 @@ public class GlobalControllerAdvice {
     @ExceptionHandler(SdsLocationException.class)
     public ResponseEntity<AbstractBaseApiResponse<Void>> handleValidationExceptions(SdsLocationException e) {
         var errorId = UUID.randomUUID().toString();
-        log.error("SdsLocationException occurred: {} {} ", errorId, e.getMessage(), e);
+        log.error("SdsLocationException occurred, Error Id: {} Error: {}", errorId, e.getMessage(), e);
 
         return ResponseEntity.status(400).body(new ApiResponse<Void>().error(
                 "400",
