@@ -5,8 +5,6 @@ import lombok.Setter;
 import org.springframework.data.relational.core.mapping.Column;
 import org.springframework.data.relational.core.mapping.Table;
 
-import java.sql.Timestamp;
-
 /**
  * @author samwel.wafula
  * Created on 4/14/2026
@@ -15,7 +13,7 @@ import java.sql.Timestamp;
 @Getter
 @Setter
 @Table("tbl_country")
-public class TblCountry {
+public class TblCountry extends AuditableEntity{
     private String id;
     @Column("name")
     private String countryName;
@@ -23,6 +21,4 @@ public class TblCountry {
     private String iso2CountryCode;
     @Column("iso3")
     private String iso3CountryCode;
-    private Timestamp createdAt;
-    private String updatedAt;
 }

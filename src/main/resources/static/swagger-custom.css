@@ -1,0 +1,463 @@
+/* =======================================================
+   1. SOFT OFF-WHITE BACKGROUND (Eye-friendly)
+   ======================================================= */
+body, 
+.swagger-ui {
+    background-color: #F8FAFC !important;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif !important;
+}
+
+/* =======================================================
+   2. TOP BAR STYLING (The very top navigation)
+   ======================================================= */
+.swagger-ui .topbar {
+    background-color: #4A4A4A !important;
+    border-bottom: 3px solid #2FBF71 !important; /* Primary Green accent line */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05) !important;
+
+    position: sticky !important;
+    top: 0 !important;
+    z-index: 100 !important;
+
+}
+
+/* Ensure any text in the topbar (like the search/explore bar) is clearly visible */
+.swagger-ui .topbar a,
+.swagger-ui .topbar span,
+.swagger-ui .topbar input {
+    color: #2FBF71 !important;
+}
+
+/* =======================================================
+   3. API HEADER SECTION (.info block)
+   ======================================================= */
+/* Ensure the main API Title and Headings are unmistakably GREEN and highly visible */
+.swagger-ui .info .title,
+.swagger-ui .info h1,
+.swagger-ui .info h2,
+.swagger-ui .info h3,
+.swagger-ui .info h4,
+.swagger-ui .info h5 {
+    color: #2FBF71 !important; /* Primary Green */
+}
+
+/* Make sure the description text in the header is visible and readable */
+.swagger-ui .info p,
+.swagger-ui .info li,
+.swagger-ui .info table {
+    color: #4A4A4A !important; /* Dark Gray for easy reading */
+    font-size: 15px !important;
+}
+
+/* Header Links */
+.swagger-ui .info a {
+    color: #F7931E !important; /* Accent Orange */
+    text-decoration: none !important;
+}
+.swagger-ui .info a:hover {
+    color: #e6831a !important; /* Darker orange on hover */
+    text-decoration: underline !important;
+}
+
+/* =======================================================
+   4. TAGS AND API ENDPOINT TEXT
+   ======================================================= */
+.swagger-ui .opblock-tag,
+.swagger-ui .model-title,
+.swagger-ui section.models h4 {
+    color: #2FBF71 !important; /* Primary Green */
+}
+
+.swagger-ui .opblock-tag small,
+.swagger-ui .opblock .opblock-summary-path,
+.swagger-ui .opblock .opblock-summary-description,
+.swagger-ui .tab li {
+    color: #4A4A4A !important; /* Secondary Dark Gray */
+}
+
+/* =======================================================
+   5. API ENDPOINT BLOCKS (Modern Cards)
+   ======================================================= */
+.swagger-ui .opblock {
+    background-color: #FFFFFF !important;
+    border: 1px solid rgba(47, 191, 113, 0.15) !important; /* Very subtle green border */
+    border-radius: 8px !important;
+    box-shadow: 0 2px 8px rgba(47, 191, 113, 0.05) !important; /* Soft greenish shadow */
+    transition: all 0.2s ease-in-out !important;
+}
+
+.swagger-ui .opblock:hover {
+    box-shadow: 0 4px 12px rgba(47, 191, 113, 0.1) !important; /* Shadow grows on hover */
+}
+
+/* =======================================================
+   6. LOGO SWAP & DEFAULT SWAGGER HIDING
+   ======================================================= */
+.swagger-ui .topbar .topbar-wrapper .link svg,
+.swagger-ui .topbar .topbar-wrapper .link img,
+.swagger-ui .topbar .topbar-wrapper .link span.svg-assets {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+}
+
+.swagger-ui .topbar .topbar-wrapper .link {
+    background-image: url('img.png') !important;
+    background-size: contain !important;
+    background-repeat: no-repeat !important;
+    background-position: left center !important;
+    display: inline-block !important;
+    width: 250px !important;
+    height: 80px !important;
+    content: "" !important;
+}
+
+/* =======================================================
+   HIDE EXPLORE SEARCH BAR
+   ======================================================= */
+.swagger-ui .topbar .download-url-wrapper {
+    display: none !important;
+}
+
+
+/* =======================================================
+   CUSTOM EXECUTE BUTTON
+   ======================================================= */
+.swagger-ui .btn.execute {
+    background-color: #2FBF71 !important; /* Primary Green */
+    color: #FFFFFF !important;
+    border: none !important;
+    border-radius: 6px !important;
+    padding: 8px 24px !important;
+    font-weight: 600 !important;
+    box-shadow: 0 4px 6px rgba(47, 191, 113, 0.2) !important;
+    transition: all 0.2s ease-in-out !important;
+}
+
+.swagger-ui .btn.execute:hover {
+    background-color: #28a65e !important; /* Slightly darker green on hover */
+    box-shadow: 0 6px 12px rgba(47, 191, 113, 0.3) !important;
+    transform: translateY(-1px) !important; /* Button lifts up slightly */
+}
+
+/* =======================================================
+   PREMIUM CODE BLOCKS (JSON Responses)
+   ======================================================= */
+.swagger-ui .highlight-code {
+    background-color: #4A4A4A !important; /* Dark Gray for code background */
+    border-radius: 8px !important;
+    border: 1px solid #5A5A5A !important;
+}
+
+/* Make sure the text inside the code block is highly readable */
+.swagger-ui .highlight-code pre {
+    color: #E2E8F0 !important;
+    font-family: "Fira Code", "Courier New", Courier, monospace !important;
+}
+
+/* =======================================================
+   PREMIUM "AUTHORIZE" BUTTON
+   ======================================================= */
+.swagger-ui .btn.authorize {
+    background-color: #F7931E !important; /* Accent Orange */
+    color: #FFFFFF !important;
+    border-color: #e6831a !important;
+    border-radius: 6px !important;
+    box-shadow: 0 4px 6px rgba(247, 147, 30, 0.2) !important;
+    padding: 8px 16px !important;
+    font-weight: 600 !important;
+    transition: all 0.2s ease !important;
+}
+
+/* Change the lock icon color to white */
+.swagger-ui .btn.authorize svg {
+    fill: #FFFFFF !important;
+}
+
+.swagger-ui .btn.authorize:hover {
+    background-color: #e6831a !important; /* Darker orange on hover */
+    box-shadow: 0 6px 12px rgba(247, 147, 30, 0.3) !important;
+    transform: translateY(-1px) !important;
+}
+
+/* =======================================================
+   "TRY IT OUT" BUTTON STYLING
+   ======================================================= */
+.swagger-ui .btn.try-out__btn {
+    background-color: transparent !important;
+    color: #F7931E !important; /* Accent Orange */
+    border: 1px solid #F7931E !important;
+    border-radius: 6px !important;
+    transition: all 0.2s ease !important;
+}
+
+.swagger-ui .btn.try-out__btn:hover {
+    background-color: #F7931E !important;
+    color: #FFFFFF !important; /* Invert colors on hover */
+}
+
+/* =======================================================
+   MODERN SCROLLBARS
+   ======================================================= */
+.swagger-ui ::-webkit-scrollbar {
+    width: 8px !important;
+    height: 8px !important;
+}
+
+.swagger-ui ::-webkit-scrollbar-track {
+    background: #F1F5F9 !important; /* Light gray track */
+    border-radius: 4px !important;
+}
+
+.swagger-ui ::-webkit-scrollbar-thumb {
+    background: #CBD5E1 !important; /* Darker gray thumb */
+    border-radius: 4px !important;
+}
+
+.swagger-ui ::-webkit-scrollbar-thumb:hover {
+    background: #94A3B8 !important; /* Even darker on hover */
+}
+
+/* =======================================================
+   IMPROVED PARAMETER TABLES
+   ======================================================= */
+.swagger-ui table.parameters tbody tr {
+    transition: background-color 0.15s ease !important;
+    border-bottom: 1px solid #E2E8F0 !important;
+}
+
+/* Subtle highlight when hovering over a parameter row */
+.swagger-ui table.parameters tbody tr:hover {
+    background-color: #F8FAFC !important;
+}
+
+/* Make parameter names bold and green */
+.swagger-ui table.parameters .parameter__name {
+    color: #2FBF71 !important;
+    font-weight: 600 !important;
+}
+
+/* =======================================================
+   ANIMATION: SMOOTH ENDPOINT EXPANSION
+   ======================================================= */
+@keyframes slideDownFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Target the wrapper that opens when you click an endpoint */
+.swagger-ui .opblock-body {
+    animation: slideDownFadeIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) ease-out !important;
+    transform-origin: top center !important;
+}
+
+/* =======================================================
+   ANIMATION: API CARD HOVER LIFT
+   ======================================================= */
+.swagger-ui .opblock {
+    background-color: #FFFFFF !important;
+    border-radius: 8px !important;
+    border: 1px solid transparent !important; /* Start transparent */
+    box-shadow: 0 2px 4px rgba(47, 191, 113, 0.05) !important;
+
+    /* Smooth transition for multiple properties */
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease !important;
+}
+
+.swagger-ui .opblock:hover {
+    transform: translateY(-3px) !important; /* Lifts the card up 3 pixels */
+    box-shadow: 0 8px 16px rgba(47, 191, 113, 0.12) !important; /* Deeper shadow */
+    border-color: rgba(47, 191, 113, 0.3) !important; /* Subtle green border appears */
+}
+
+/* =======================================================
+   ANIMATION: SUBTLE CODE BLOCK SHIMMER
+   ======================================================= */
+@keyframes subtleShimmer {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.swagger-ui .highlight-code {
+    border-radius: 8px !important;
+    border: 1px solid #5A5A5A !important;
+
+    /* Deep gray gradient */
+    background: linear-gradient(-45deg, #4A4A4A, #5A5A5A, #4A4A4A) !important;
+    background-size: 200% 200% !important;
+    animation: subtleShimmer 3s ease-in-out infinite !important;
+}
+
+/* =======================================================
+   HTTP METHOD COLORS WITH YOUR PALETTE
+   ======================================================= */
+/* GET - Primary Green */
+.swagger-ui .opblock.opblock-get .opblock-summary-method {
+    background: #2FBF71 !important;
+}
+.swagger-ui .opblock.opblock-get {
+    border-color: rgba(47, 191, 113, 0.3) !important;
+    background: rgba(47, 191, 113, 0.02) !important;
+}
+
+/* POST - Accent Orange */
+.swagger-ui .opblock.opblock-post .opblock-summary-method {
+    background: #F7931E !important;
+}
+.swagger-ui .opblock.opblock-post {
+    border-color: rgba(247, 147, 30, 0.3) !important;
+    background: rgba(247, 147, 30, 0.02) !important;
+}
+
+/* PUT - Dark Gray */
+.swagger-ui .opblock.opblock-put .opblock-summary-method {
+    background: #4A4A4A !important;
+}
+.swagger-ui .opblock.opblock-put {
+    border-color: rgba(74, 74, 74, 0.3) !important;
+    background: rgba(74, 74, 74, 0.02) !important;
+}
+
+/* DELETE - Red accent */
+.swagger-ui .opblock.opblock-delete .opblock-summary-method {
+    background: #DC2626 !important;
+}
+.swagger-ui .opblock.opblock-delete {
+    border-color: rgba(220, 38, 38, 0.3) !important;
+    background: rgba(220, 38, 38, 0.02) !important;
+}
+
+/* PATCH - Purple accent */
+.swagger-ui .opblock.opblock-patch .opblock-summary-method {
+    background: #7C3AED !important;
+}
+.swagger-ui .opblock.opblock-patch {
+    border-color: rgba(124, 58, 237, 0.3) !important;
+    background: rgba(124, 58, 237, 0.02) !important;
+}
+/* Ensure the text stays readable on top of the animation */
+.swagger-ui .highlight-code pre {
+    color: #E2E8F0 !important;
+    background: transparent !important; /* Let the shimmer show through */
+}
+
+/* =======================================================
+   MODERN SERVER DROPDOWN
+   ======================================================= */
+.swagger-ui .servers > label select {
+    background-color: #F8FAFC !important;
+    border: 1px solid #CBD5E1 !important;
+    border-radius: 8px !important;
+    padding: 8px 12px !important;
+    color: #334155 !important;
+    font-weight: 600 !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.02) !important;
+    transition: all 0.2s ease !important;
+    cursor: pointer !important;
+}
+
+/* =======================================================
+   PILL-SHAPED TAGS
+   ======================================================= */
+.swagger-ui .opblock-tag {
+    font-size: 20px !important;
+    font-weight: 700 !important;
+    background-color: #EFF6FF !important; /* Very soft blue background */
+    color: #1E40AF !important; /* Royal blue text */
+    padding: 10px 20px !important;
+    border-radius: 50px !important; /* Makes it a pill shape */
+    display: inline-flex !important;
+    margin-bottom: 15px !important;
+    border: 1px solid #BFDBFE !important; /* Subtle outline */
+}
+
+/* Remove the default ugly black border under tags */
+.swagger-ui .opblock-tag {
+    border-bottom: none !important;
+}
+
+
+/* =======================================================
+   CUSTOM TEXT HIGHLIGHT
+   ======================================================= */
+.swagger-ui ::selection {
+    background-color: #1E40AF !important;
+    color: #FFFFFF !important;
+}
+
+.swagger-ui ::-moz-selection {
+    background-color: #1E40AF !important;
+    color: #FFFFFF !important;
+}
+
+/* =======================================================
+   CENTERED LAYOUT - ALL APIs IN ONE SINGLE CARD
+   ======================================================= */
+/* 1. The Outer Background (The Margins) */
+body {
+    background-color: #E2E8F0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* 2. Ensure all containers are centered and transparent by default */
+.swagger-ui .wrapper {
+    max-width: 1200px !important;
+    margin: 0 auto !important;
+    padding: 20px !important;
+    background-color: transparent !important;
+    box-shadow: none !important;
+}
+
+/* 3. THE SINGLE MASTER CARD FOR ALL APIs */
+/* This perfectly targets ONLY the wrapper that holds the API endpoints */
+.swagger-ui .wrapper:has(.opblock-tag-section) {
+    background-color: #FFFFFF !important;
+    padding: 40px !important;
+    border-radius: 12px !important;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05), 0 4px 10px rgba(0, 0, 0, 0.03) !important;
+    margin-bottom: 40px !important;
+}
+
+/* 4. Remove the individual "independent card" styling from the tags */
+.swagger-ui .opblock-tag-section {
+    background-color: transparent !important;
+    padding: 0 !important;
+    margin-bottom: 30px !important;
+    border-radius: 0 !important;
+    box-shadow: none !important;
+}
+
+/* 5. Fix the bottom Schemas/Models so they stay transparent (no empty boxes) */
+.swagger-ui section.models,
+.swagger-ui section.models .model-container {
+    background-color: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+}
+
+/* =======================================================
+   CUSTOM FOOTER (Fixed: Only one footer)
+   ======================================================= */
+body::after {
+    content: "© 2025 Service Delivery Request. All rights reserved. | Internal API Documentation" !important;
+
+    display: block !important;
+    text-align: center !important;
+    padding: 30px 20px !important;
+    margin-top: auto !important; /* Pushes it to the bottom */
+
+    color: #64748B !important; /* Soft slate gray */
+    font-size: 14px !important;
+    font-weight: 500 !important;
+
+    width: 100% !important;
+    background-color: transparent !important;
+}

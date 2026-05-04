@@ -13,7 +13,7 @@ import org.springframework.data.relational.core.mapping.Table;
 @Getter
 @Setter
 @Table("tbl_country_divisions")
-public class TblCountryDivisions {
+public class TblCountryDivisions extends AuditableEntity {
     private String id;
     @Column("country_iso2")
     private String iso2CountryCode;
@@ -22,8 +22,5 @@ public class TblCountryDivisions {
     @Column("geom")
     private org.locationtech.jts.geom.Geometry geom;
     private boolean supported;
-    private String createdAt;
-    private String updatedAt;
-
 
 }

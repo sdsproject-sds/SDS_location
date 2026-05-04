@@ -16,7 +16,7 @@ import java.sql.Timestamp;
 @Getter
 @Setter
 @Table("country_sub_divisions")
-public class TblCountrySubDivisions {
+public class TblCountrySubDivisions extends AuditableEntity {
     private String id;
     @Column("division_code")
     private String divisionCode;
@@ -24,7 +24,4 @@ public class TblCountrySubDivisions {
     private String countrySubDivisionName;
     @Column("geom")
     private org.locationtech.jts.geom.Geometry geom;
-    private Timestamp createdAt;
-    private Timestamp updatedAt;
-    private String updatedBy;
 }
