@@ -21,7 +21,7 @@ public class PolygonGeometry {
     private List<List<List<Double>>> coordinates;
 
     /**
-     * Create PolygonGeometry from JTS Geometry object
+     * Create PolygonGeometry from a JTS Geometry object
      */
     public static PolygonGeometry fromGeometry(Geometry geometry) {
         if (geometry == null) {
@@ -40,26 +40,17 @@ public class PolygonGeometry {
      */
     private static List<List<List<Double>>> extractCoordinates(Geometry geometry) {
         String type = geometry.getGeometryType();
-        
-        switch (type) {
-            case "Polygon":
-                return extractPolygonCoordinates((Polygon) geometry);
-            
-            case "MultiPolygon":
-                return extractMultiPolygonCoordinates((MultiPolygon) geometry);
-                
-            case "Point":
-                // Convert point to a simple polygon (square around the point)
-                return convertPointToPolygon((Point) geometry);
-                
-            case "LineString":
-                // Convert linestring to a polygon by buffering
-                return convertLineStringToPolygon((LineString) geometry);
-                
-            default:
-                // For other geometries, try to get the envelope as a polygon
-                return extractPolygonCoordinates((Polygon) geometry.getEnvelope());
-        }
+
+        return switch (type) {
+            case "Polygon" -> extractPolygonCoordinates((Polygon) geometry);
+            case "MultiPolygon" -> extractMultiPolygonCoordinates((MultiPolygon) geometry);
+            case "Point" ->
+                    convertPointToPolygon((Point) geometry);
+            case "LineString" ->
+                    convertLineStringToPolygon((LineString) geometry);
+            default ->
+                    extractPolygonCoordinates((Polygon) geometry.getEnvelope());
+        };
     }
     
     private static List<List<List<Double>>> extractPolygonCoordinates(Polygon polygon) {
@@ -107,17 +98,13 @@ public class PolygonGeometry {
     }
     
     private static List<List<List<Double>>> convertLineStringToPolygon(LineString lineString) {
-        // Create a simple polygon from linestring coordinates
-        // This is a basic conversion - you might want to implement proper buffering
+
         Coordinate[] coords = lineString.getCoordinates();
         List<List<Double>> ring = new ArrayList<>();
-        
-        // Add all coordinates
         for (Coordinate coord : coords) {
             ring.add(List.of(coord.x, coord.y));
         }
-        
-        // Close the ring if not already closed
+
         if (!coords[0].equals(coords[coords.length - 1])) {
             ring.add(List.of(coords[0].x, coords[0].y));
         }
