@@ -1,11 +1,12 @@
 package org.sds.sdslocation.repository;
 
-import org.sds.sdslocation.repository.accessinterfacerepo.CountryDivision;
+import org.sds.sdslocation.model.CountryDivision;
+import org.sds.sdslocation.model.SubDivision;
+import org.sds.sdslocation.repository.accessinterfacerepo.CountryDivisionRepos;
 import org.sds.sdslocation.repository.accessinterfacerepo.CountrySubDivisionRepo;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.UUID;
 
 /**
  * @author samwel.wafula
@@ -14,20 +15,47 @@ import java.util.UUID;
  */
 @Service
 public class DataRepository {
-    private final CountryDivision countryDivision;
+    private final CountryDivisionRepos countryDivision;
     private final CountrySubDivisionRepo countrySubDivisionRepo;
 
-    public DataRepository(CountryDivision countryDivision, CountrySubDivisionRepo countrySubDivisionRepo) {
+    public DataRepository(CountryDivisionRepos countryDivision, CountrySubDivisionRepo countrySubDivisionRepo) {
         this.countryDivision = countryDivision;
         this.countrySubDivisionRepo = countrySubDivisionRepo;
     }
 
-    public void saveSubDivision(String geoJson, String divisionCode, String subDivisionName) {
-        countrySubDivisionRepo.nativeCreate(divisionCode, subDivisionName, geoJson);
+    public SubDivision saveSubDivision(String geoJson, String divisionCode, String subDivisionName) {
+       return countrySubDivisionRepo.nativeCreate(divisionCode, subDivisionName, geoJson)
+               .toSubDivision();
     }
 
-    public void saveDivision(String countryIso2, String divisionCode, String divisionName, String geoString) {
-        countryDivision.nativeCreate(countryIso2, divisionCode, divisionName, geoString);
+    public CountryDivision saveDivision(String countryIso2, String divisionCode, String divisionName, String geoString) {
+        return countryDivision.nativeCreate(countryIso2, divisionCode, divisionName, geoString)
+                .toCountryDivision();
+    }
+
+    public boolean updateDivision(String divisionCode, String countryIso2, String divisionName,
+                                  String geoString, Boolean supported, String updatedBy) {
+        int rowsAffected = countryDivision.updateDivision(
+                divisionCode,
+                countryIso2,
+                divisionName,
+                geoString,
+                supported,
+                updatedBy
+        );
+        return rowsAffected > 0;
+    }
+
+    public boolean updateSubDivision(Long id, String divisionCode, String subDivisionName,
+                                     String geoString, String updatedBy) {
+        int rowsAffected = countrySubDivisionRepo.updateSubDivision(
+                id,
+                divisionCode,
+                subDivisionName,
+                geoString,
+                updatedBy
+        );
+        return rowsAffected > 0;
     }
 
     public List<TblCountrySubDivisions> getSubDivision(Double lon, Double lat) {
@@ -36,6 +64,58 @@ public class DataRepository {
 
     public List<TblCountryDivisions> getDivision(Double lon, Double lat) {
         return countryDivision.getDivision(lon, lat);
+    }
+
+    public TblCountryDivisions getDivisionByDivisionCode(String divisionCode) {
+        return countryDivision.findByDivisionCode(divisionCode)
+                .orElse(null);
+    }
+
+    public TblCountryDivisions getDivisionById(String id) {
+        return countryDivision.findByDivisionId(id)
+                .orElse(null);
+    }
+
+    public SubDivision getSubDivisionById(Long id) {
+        return countrySubDivisionRepo.findBySubDivisionId(id)
+                .map(TblCountrySubDivisions::toSubDivision)
+                .orElse(null);
+    }
+
+    public boolean deleteSubDivision(Long id, String deletedBy) {
+        int rowsAffected = countrySubDivisionRepo.softDeleteSubDivision(id, deletedBy);
+        return rowsAffected > 0;
+    }
+
+    public boolean hardDeleteSubDivision(Long id) {
+        int rowsAffected = countrySubDivisionRepo.hardDeleteSubDivision(id);
+        return rowsAffected > 0;
+    }
+
+    public boolean subDivisionExists(Long id) {
+        return countrySubDivisionRepo.existsActiveSubDivision(id);
+    }
+
+    public boolean deleteDivision(String divisionCode, String deletedBy) {
+        int rowsAffected = countryDivision.softDeleteDivision(divisionCode, deletedBy);
+        return rowsAffected > 0;
+    }
+
+    public boolean hardDeleteDivision(String divisionCode) {
+        int rowsAffected = countryDivision.hardDeleteDivision(divisionCode);
+        return rowsAffected > 0;
+    }
+
+    public boolean divisionExists(String divisionCode) {
+        return countryDivision.existsActiveDivision(divisionCode);
+    }
+
+    public long countActiveSubDivisions(String divisionCode) {
+        return countryDivision.countActiveSubDivisions(divisionCode);
+    }
+
+    public boolean isCountryDivisionAvailable(String divisionCode) {
+        return countryDivision.findByDivisionCode(divisionCode).isPresent();
     }
 
 }

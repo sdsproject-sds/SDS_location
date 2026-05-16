@@ -14,7 +14,7 @@ import lombok.*;
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 @NoArgsConstructor
-public class RegionResponse {
+public class RegionSupportResponse {
     private String locationArea;
     private boolean supported;
     private boolean available;

@@ -23,7 +23,7 @@ create TABLE IF NOT EXISTS tbl_country_divisions
     id            BIGSERIAL UNIQUE,
     country_iso2  CHAR(2) NOT NULL,
     division      TEXT    NOT NULL,
-    division_code CHAR(3) PRIMARY KEY, -- e.g. NBO
+    division_code varchar(50) PRIMARY KEY, -- e.g. NBO
     geom          GEOMETRY(POLYGON, 4326),
     supported     boolean DEFAULT true,
 
