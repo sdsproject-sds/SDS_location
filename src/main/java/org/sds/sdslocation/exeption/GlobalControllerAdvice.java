@@ -43,4 +43,17 @@ public class GlobalControllerAdvice {
                 errorId
         ));
     }
+
+    @ExceptionHandler(SdsLocationNotFoundException.class)
+    public ResponseEntity<AbstractBaseApiResponse<Void>> handleVNotFoundExceptions(SdsLocationNotFoundException e) {
+        var errorId = UUID.randomUUID().toString();
+        log.error("SdsLocationNotFoundException occurred, Error Id: {} Error: {}", errorId, e.getMessage(), e);
+
+        return ResponseEntity.status(404).body(new ApiResponse<Void>().error(
+                "404",
+                "Request Failed",
+                e.getMessage(),
+                errorId
+        ));
+    }
 }
