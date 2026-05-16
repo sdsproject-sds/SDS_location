@@ -1,10 +1,7 @@
 package org.sds.sdslocation.controller;
 
 import com.sds.integration.commons.model.AbstractBaseApiResponse;
-import org.sds.sdslocation.model.Coordinates2D;
-import org.sds.sdslocation.model.CountryDivision;
-import org.sds.sdslocation.model.RegionSupportResponse;
-import org.sds.sdslocation.model.SubDivision;
+import org.sds.sdslocation.model.*;
 import org.sds.sdslocation.model.request.CountryDivisionRequest;
 import org.sds.sdslocation.model.request.CountryDivisionUpdateRequest;
 import org.sds.sdslocation.model.request.SubDivisionRequest;
@@ -74,13 +71,13 @@ class LocationController {
      * {"lon":36.89326,"lat":-1.21326}
      *
      * @param coordinates {@link Coordinates2D}
-     * @return {@link RegionSupportResponse}
+     * @return {@link CountryDivisionLookupResponse}
      */
     @GetMapping(value = "/division")
-    public ResponseEntity<AbstractBaseApiResponse<RegionSupportResponse>> getDivision(@ParameterObject Coordinates2D coordinates) {
+    public ResponseEntity<AbstractBaseApiResponse<CountryDivisionLookupResponse>> getDivision(@ParameterObject Coordinates2D coordinates) {
 
-        RegionSupportResponse response = locationService.getDivision(coordinates.getLon(), coordinates.getLat());
-        return ResponseEntity.ok(new ApiResponse<RegionSupportResponse>().success(
+        CountryDivisionLookupResponse response = locationService.getDivision(coordinates.getLon(), coordinates.getLat());
+        return ResponseEntity.ok(new ApiResponse<CountryDivisionLookupResponse>().success(
                 "200",
                 SUCCESS,
                 response
@@ -199,13 +196,13 @@ class LocationController {
      * {"lon":36.89326,"lat":-1.21326}
      *
      * @param coordinates {@link Coordinates2D}
-     * @return {@link RegionSupportResponse}
+     * @return {@link SubDivisionLookupResponse}
      */
     @GetMapping(value = "sub-division")
-    public ResponseEntity<AbstractBaseApiResponse<RegionSupportResponse>> getSubDivision(@ParameterObject Coordinates2D coordinates) {
+    public ResponseEntity<AbstractBaseApiResponse<SubDivisionLookupResponse>> getSubDivision(@ParameterObject Coordinates2D coordinates) {
 
-        RegionSupportResponse response = locationService.getSubDivision(coordinates.getLon(), coordinates.getLat());
-        return ResponseEntity.ok(new ApiResponse<RegionSupportResponse>().success(
+        SubDivisionLookupResponse response = locationService.getSubDivision(coordinates.getLon(), coordinates.getLat());
+        return ResponseEntity.ok(new ApiResponse<SubDivisionLookupResponse>().success(
                 "200",
                 SUCCESS,
                 response

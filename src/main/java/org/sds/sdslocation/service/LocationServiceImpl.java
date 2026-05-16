@@ -3,10 +3,8 @@ package org.sds.sdslocation.service;
 import lombok.extern.slf4j.Slf4j;
 import org.sds.sdslocation.exeption.SdsLocationException;
 import org.sds.sdslocation.exeption.SdsLocationNotFoundException;
-import org.sds.sdslocation.model.CountryDivision;
-import org.sds.sdslocation.model.PolygonGeometry;
-import org.sds.sdslocation.model.RegionSupportResponse;
-import org.sds.sdslocation.model.SubDivision;
+import org.sds.sdslocation.model.*;
+import org.sds.sdslocation.model.CountryDivisionLookupResponse;
 import org.sds.sdslocation.model.request.CountryDivisionRequest;
 import org.sds.sdslocation.model.request.CountryDivisionUpdateRequest;
 import org.sds.sdslocation.model.request.SubDivisionRequest;
@@ -165,30 +163,31 @@ public class LocationServiceImpl {
     }
 
 
-    public RegionSupportResponse getSubDivision(Double lon, Double lat) {
+    public SubDivisionLookupResponse getSubDivision(Double lon, Double lat) {
         List<TblCountrySubDivisions> regions = dataRepository.getSubDivision(lon, lat);
         if (!regions.isEmpty()) {
-            return RegionSupportResponse.builder()
-                    .locationArea(regions.get(0).getCountrySubDivisionName())
+            return SubDivisionLookupResponse.builder()
+                    .subDivision(regions.get(0).toSubDivision())
+                    .available(true)
                     .supported(true)
                     .build();
         }
-        return RegionSupportResponse.builder()
+        return SubDivisionLookupResponse.builder()
                 .supported(false)
                 .available(false)
                 .build();
     }
 
-    public RegionSupportResponse getDivision(Double lon, Double lat) {
+    public CountryDivisionLookupResponse getDivision(Double lon, Double lat) {
         List<TblCountryDivisions> regions = dataRepository.getDivision(lon, lat);
         if (!regions.isEmpty()) {
-            return RegionSupportResponse.builder()
-                    .locationArea(regions.get(0).getDivision())
+            return CountryDivisionLookupResponse.builder()
+                    .countryDivision(regions.get(0).toCountryDivision())
                     .available(true)
                     .supported(regions.get(0).isSupported())
                     .build();
         }
-        return RegionSupportResponse.builder()
+        return CountryDivisionLookupResponse.builder()
                 .supported(false)
                 .available(false)
                 .build();

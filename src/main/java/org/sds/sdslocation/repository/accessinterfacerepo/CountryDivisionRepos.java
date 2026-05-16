@@ -59,7 +59,10 @@ public interface CountryDivisionRepos extends CrudRepository<TblCountryDivisions
 
 
     @Query("""
-                SELECT *
+                SELECT
+                    id, country_iso2, division, division_code,
+                  ST_AsBinary(geom) as geom, supported,
+                  status, created_at, updated_at, created_by, updated_by
                 FROM tbl_country_divisions
                 WHERE ST_Intersects(
                     geom,
@@ -67,7 +70,7 @@ public interface CountryDivisionRepos extends CrudRepository<TblCountryDivisions
                 )
             """)
     List<TblCountryDivisions> getDivision(@Param("lon") Double lon,
-                                                @Param("lat") Double lat);
+                                          @Param("lat") Double lat);
 
 
     @Query("""
@@ -77,7 +80,6 @@ public interface CountryDivisionRepos extends CrudRepository<TblCountryDivisions
             FROM tbl_country_divisions
             WHERE division_code = :divisionCode
             """)
-
     Optional<TblCountryDivisions> findByDivisionCode(@Param("divisionCode") String divisionCode);
 
 
