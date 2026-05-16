@@ -1,12 +1,19 @@
 package org.sds.sdslocation.service;
 
 import lombok.extern.slf4j.Slf4j;
+import org.sds.sdslocation.exeption.SdsLocationException;
+import org.sds.sdslocation.model.CountryDivision;
 import org.sds.sdslocation.model.PolygonGeometry;
-import org.sds.sdslocation.model.PolygonRequest;
-import org.sds.sdslocation.model.RegionResponse;
+import org.sds.sdslocation.model.RegionSupportResponse;
+import org.sds.sdslocation.model.SubDivision;
+import org.sds.sdslocation.model.request.CountryDivisionRequest;
+import org.sds.sdslocation.model.request.CountryDivisionUpdateRequest;
+import org.sds.sdslocation.model.request.SubDivisionRequest;
+import org.sds.sdslocation.model.request.SubDivisionUpdateRequest;
 import org.sds.sdslocation.repository.DataRepository;
 import org.sds.sdslocation.repository.TblCountryDivisions;
 import org.sds.sdslocation.repository.TblCountrySubDivisions;
+import org.sds.sdslocation.utility.ULIDRef;
 import org.springframework.stereotype.Service;
 import tools.jackson.databind.ObjectMapper;
 
@@ -22,7 +29,8 @@ import java.util.Map;
 @Slf4j
 public class LocationServiceImpl {
 
-    // private final CountrySubDivisionRepo countrySubDivisionRepo;
+    public static final String POLYGON = "Polygon";
+    public static final String COORDINATES = "coordinates";
     private final DataRepository dataRepository;
 
     public LocationServiceImpl(DataRepository dataRepository) {
@@ -30,60 +38,273 @@ public class LocationServiceImpl {
     }
 
 
-    public RegionResponse getSubDivision(Double lon, Double lat) {
+
+    public CountryDivision updateDivision(String divisionCode, CountryDivisionUpdateRequest request, String updatedBy) {
+        // Check if division exists
+        if (!dataRepository.divisionExists(divisionCode)) {
+            throw new SdsLocationException("Division with code " + divisionCode + " not found");
+        }
+
+        try {
+            // Preprocess values - convert empty strings to null
+            String countryIso2 = preprocessString(request.getCountryCode() != null ? request.getCountryCode().getAlpha2() : null);
+            String divisionName = preprocessString(request.getDivision());
+            String geoString = null;
+            Boolean supported = request.getSupported();
+
+            // Process geometry if provided
+            if (request.getPolygonGeometry() != null &&
+                    request.getPolygonGeometry().getCoordinates() != null &&
+                    !request.getPolygonGeometry().getCoordinates().isEmpty()) {
+
+                List<List<List<Double>>> cleaned = request.getPolygonGeometry().getCoordinates()
+                        .stream()
+                        .map(ring -> ring.stream()
+                                .map(cord -> List.of(cord.get(0), cord.get(1)))
+                                .toList()
+                        ).toList();
+
+                Map<String, Object> geoJson = Map.of(
+                        "type", POLYGON,
+                        COORDINATES, cleaned
+                );
+
+                geoString = new ObjectMapper().writeValueAsString(geoJson);
+                log.info("Updated geo String {}", geoString);
+            }
+
+            // Check if any update is provided
+            if (countryIso2 == null && divisionName == null && geoString == null && supported == null) {
+                throw new SdsLocationException("No valid update data provided. All fields are null or empty.");
+            }
+
+            // Perform single update
+            boolean updated = dataRepository.updateDivision(
+                    divisionCode,
+                    countryIso2,
+                    divisionName,
+                    geoString,
+                    supported,
+                    updatedBy != null ? updatedBy : "system"
+            );
+
+            if (updated) {
+                // Return updated division
+                TblCountryDivisions updatedDivision = dataRepository.getDivisionById(divisionCode);
+                return updatedDivision != null ? updatedDivision.toCountryDivision() : null;
+            } else {
+                throw new SdsLocationException("No rows were updated. Division may not exist or be inactive.");
+            }
+
+        } catch (Exception e) {
+            log.error("Error updating division with code: {}", divisionCode, e);
+            if (e instanceof SdsLocationException) {
+                throw e;
+            }
+            throw new SdsLocationException("Failed to update division: " + e.getMessage());
+        }
+    }
+
+    public SubDivision updateSubDivision(Long id, SubDivisionUpdateRequest request, String updatedBy) {
+        if (!dataRepository.subDivisionExists(id)) {
+            throw new SdsLocationException("Sub-division with ID " + id + " not found");
+        }
+
+        try {
+            String divisionCode = preprocessString(request.getDivisionId());
+            String subDivisionName = preprocessString(request.getSubDivisionName());
+            String geoString = null;
+
+            // Validate division exists if provided
+            if (divisionCode != null && !dataRepository.isCountryDivisionAvailable(divisionCode)) {
+                throw new SdsLocationException("Division with code " + divisionCode + " not available");
+            }
+
+            if (request.getPolygonGeometry() != null &&
+                    request.getPolygonGeometry().getCoordinates() != null &&
+                    !request.getPolygonGeometry().getCoordinates().isEmpty()) {
+
+                List<List<List<Double>>> cleaned = request.getPolygonGeometry().getCoordinates()
+                        .stream()
+                        .map(ring -> ring.stream()
+                                .map(cord -> List.of(cord.get(0), cord.get(1)))
+                                .toList()
+                        ).toList();
+
+                Map<String, Object> geoJson = Map.of(
+                        "type", POLYGON,
+                        COORDINATES, cleaned
+                );
+
+                geoString = new ObjectMapper().writeValueAsString(geoJson);
+                log.info("Updated subdivision geo String {}", geoString);
+            }
+
+            if (divisionCode == null && subDivisionName == null && geoString == null) {
+                throw new SdsLocationException("No valid update data provided. All fields are null or empty.");
+            }
+
+            boolean updated = dataRepository.updateSubDivision(
+                    id,
+                    divisionCode,
+                    subDivisionName,
+                    geoString,
+                    updatedBy != null ? updatedBy : "system"
+            );
+
+            if (updated) {
+                return dataRepository.getSubDivisionById(id);
+            } else {
+                throw new SdsLocationException("No rows were updated. Sub-division may not exist or be inactive.");
+            }
+
+        } catch (Exception e) {
+            log.error("Error updating sub-division with ID: {}", id, e);
+            if (e instanceof SdsLocationException) {
+                throw e;
+            }
+            throw new SdsLocationException("Failed to update sub-division: " + e.getMessage());
+        }
+    }
+
+    private String preprocessString(String value) {
+        return (value != null && !value.trim().isEmpty()) ? value.trim() : null;
+    }
+
+
+    public RegionSupportResponse getSubDivision(Double lon, Double lat) {
         List<TblCountrySubDivisions> regions = dataRepository.getSubDivision(lon, lat);
         if (!regions.isEmpty()) {
-            log.info("regions {}", regions.size());
-            log.info("name {}", regions.get(0).getCountrySubDivisionName());
-            return RegionResponse.builder()
+            return RegionSupportResponse.builder()
                     .locationArea(regions.get(0).getCountrySubDivisionName())
                     .supported(true)
                     .build();
         }
-        return RegionResponse.builder()
+        return RegionSupportResponse.builder()
                 .supported(false)
                 .available(false)
                 .build();
     }
 
-    public RegionResponse getDivision(Double lon, Double lat) {
+    public RegionSupportResponse getDivision(Double lon, Double lat) {
         List<TblCountryDivisions> regions = dataRepository.getDivision(lon, lat);
         if (!regions.isEmpty()) {
-            log.info("regions {}", regions.size());
-            log.info("name {}", regions.get(0).getDivision());
-            return RegionResponse.builder()
+            return RegionSupportResponse.builder()
                     .locationArea(regions.get(0).getDivision())
                     .available(true)
                     .supported(regions.get(0).isSupported())
                     .build();
         }
-        return RegionResponse.builder()
+        return RegionSupportResponse.builder()
                 .supported(false)
                 .available(false)
                 .build();
     }
 
-    public String createSubDivision(PolygonRequest request) throws Exception {
-        PolygonGeometry geom = request.getPolygonGeometry();
-
-        List<List<List<Double>>> cleaned = geom.getCoordinates()
-                .stream()
-                .map(ring -> ring.stream()
-                        .map(cord -> List.of(cord.get(0), cord.get(1)))
-                        .toList()
-                ).toList();
-
-        Map<String, Object> geoJson = Map.of(
-                "type", "Polygon",
-                "coordinates", cleaned
-        );
-        String geoJsonString = new ObjectMapper().writeValueAsString(geoJson);
-        log.info("geo String {}", geoJsonString);
-        dataRepository.saveSubDivision(geoJsonString, request.getDivisionCode(), request.getProperties().get("Name"));
-        return geoJsonString;
+    public CountryDivision getDivisionById(String id) {
+        TblCountryDivisions division = dataRepository.getDivisionById(id);
+        return division != null ? division.toCountryDivision() : null;
     }
 
-    public String createDivision(PolygonRequest request) {
+    public SubDivision getSubDivisionById(Long id) {
+        return dataRepository.getSubDivisionById(id);
+    }
+
+    public boolean deleteSubDivision(Long id, String deletedBy) {
+        // Check if subdivision exists
+        if (!dataRepository.subDivisionExists(id)) {
+            throw new SdsLocationException("Sub-division with ID " + id + " not found or already deleted");
+        }
+
+        try {
+            return dataRepository.deleteSubDivision(id, deletedBy);
+        } catch (Exception e) {
+            log.error("Error deleting sub-division with ID: {}", id, e);
+            throw new SdsLocationException("Failed to delete sub-division: " + e.getMessage());
+        }
+    }
+
+    public boolean hardDeleteSubDivision(Long id) {
+        // Check if subdivision exists first
+        if (!dataRepository.subDivisionExists(id)) {
+            throw new SdsLocationException("Sub-division with ID " + id + " not found");
+        }
+
+        try {
+            return dataRepository.hardDeleteSubDivision(id);
+        } catch (Exception e) {
+            log.error("Error hard deleting sub-division with ID: {}", id, e);
+            throw new SdsLocationException("Failed to hard delete sub-division: " + e.getMessage());
+        }
+    }
+
+    public boolean deleteDivision(String divisionCode, String deletedBy) {
+        // Check if division exists
+        if (!dataRepository.divisionExists(divisionCode)) {
+            throw new SdsLocationException("Division with code " + divisionCode + " not found or already deleted");
+        }
+
+        // Check if there are active subdivisions
+        long activeSubDivisions = dataRepository.countActiveSubDivisions(divisionCode);
+        if (activeSubDivisions > 0) {
+            throw new SdsLocationException("Cannot delete division " + divisionCode +
+                    ". It has " + activeSubDivisions + " active sub-divisions. Please delete them first.");
+        }
+
+        try {
+            return dataRepository.deleteDivision(divisionCode, deletedBy);
+        } catch (Exception e) {
+            log.error("Error deleting division with code: {}", divisionCode, e);
+            throw new SdsLocationException("Failed to delete division: " + e.getMessage());
+        }
+    }
+
+    public boolean hardDeleteDivision(String divisionCode) {
+        // Check if division exists
+        if (!dataRepository.divisionExists(divisionCode)) {
+            throw new SdsLocationException("Division with code " + divisionCode + " not found");
+        }
+
+        // Check if there are any subdivisions (active or inactive)
+        long totalSubDivisions = dataRepository.countActiveSubDivisions(divisionCode);
+        if (totalSubDivisions > 0) {
+            throw new SdsLocationException("Cannot permanently delete division " + divisionCode +
+                    ". It has " + totalSubDivisions + " sub-divisions. Delete them first.");
+        }
+
+        try {
+            return dataRepository.hardDeleteDivision(divisionCode);
+        } catch (Exception e) {
+            log.error("Error hard deleting division with code: {}", divisionCode, e);
+            throw new SdsLocationException("Failed to hard delete division: " + e.getMessage());
+        }
+    }
+
+
+    public SubDivision createSubDivision(SubDivisionRequest subDivision) {
+        PolygonGeometry geom = subDivision.getPolygonGeometry();
+
+        if (!dataRepository.isCountryDivisionAvailable(subDivision.getDivisionId())){
+            throw new SdsLocationException("Division not available");
+        }
+
+        List<List<List<Double>>> cleaned = geom.getCoordinates()
+                .stream()
+                .map(ring -> ring.stream()
+                        .map(cord -> List.of(cord.get(0), cord.get(1)))
+                        .toList()
+                ).toList();
+
+        Map<String, Object> geoJson = Map.of(
+                "type", POLYGON,
+                COORDINATES, cleaned
+        );
+
+        String geoJsonString = new ObjectMapper().writeValueAsString(geoJson);
+       return dataRepository.saveSubDivision(geoJsonString, subDivision.getDivisionId(), subDivision.getSubDivisionName());
+    }
+
+    public CountryDivision createDivision(CountryDivisionRequest request) {
         PolygonGeometry geom = request.getPolygonGeometry();
 
         List<List<List<Double>>> cleaned = geom.getCoordinates()
@@ -94,13 +315,12 @@ public class LocationServiceImpl {
                 ).toList();
 
         Map<String, Object> geoJson = Map.of(
-                "type", "Polygon",
-                "coordinates", cleaned
+                "type", POLYGON,
+                COORDINATES, cleaned
         );
         String geoJsonString = new ObjectMapper().writeValueAsString(geoJson);
         log.info("geo String {}", geoJsonString);
-        dataRepository.saveDivision(request.getCountryIsoCode2(), request.getDivisionCode(), request.getDivision(), geoJsonString);
-        return geoJsonString;
+        return dataRepository.saveDivision(request.getCountryCode().getAlpha2(), ULIDRef.get(), request.getDivision(), geoJsonString);
     }
 
 }
