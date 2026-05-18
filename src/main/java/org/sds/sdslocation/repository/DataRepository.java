@@ -2,8 +2,10 @@ package org.sds.sdslocation.repository;
 
 import org.sds.sdslocation.model.CountryDivision;
 import org.sds.sdslocation.model.SubDivision;
+import org.sds.sdslocation.model.UserLocation;
 import org.sds.sdslocation.repository.accessinterfacerepo.CountryDivisionRepos;
 import org.sds.sdslocation.repository.accessinterfacerepo.CountrySubDivisionRepo;
+import org.sds.sdslocation.repository.accessinterfacerepo.UserLocationRepo;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,15 +19,26 @@ import java.util.List;
 public class DataRepository {
     private final CountryDivisionRepos countryDivision;
     private final CountrySubDivisionRepo countrySubDivisionRepo;
+    private final UserLocationRepo userLocationRepo;
 
-    public DataRepository(CountryDivisionRepos countryDivision, CountrySubDivisionRepo countrySubDivisionRepo) {
+    public DataRepository(CountryDivisionRepos countryDivision, CountrySubDivisionRepo countrySubDivisionRepo, UserLocationRepo userLocationRepo) {
         this.countryDivision = countryDivision;
         this.countrySubDivisionRepo = countrySubDivisionRepo;
+        this.userLocationRepo = userLocationRepo;
+    }
+
+    public UserLocation saveUserLocation(String deviceId, String userId, double lat, double lon) {
+        return userLocationRepo.saveUserLocation(deviceId, userId, lat, lon)
+                .userLocation();
+    }
+
+    public List<TblDeviceLocation> findNearbyUsers(double lat, double lon) {
+        return userLocationRepo.findNearbyUsers(lat, lon, 2000);
     }
 
     public SubDivision saveSubDivision(String geoJson, String divisionCode, String subDivisionName) {
-       return countrySubDivisionRepo.nativeCreate(divisionCode, subDivisionName, geoJson)
-               .toSubDivision();
+        return countrySubDivisionRepo.nativeCreate(divisionCode, subDivisionName, geoJson)
+                .toSubDivision();
     }
 
     public CountryDivision saveDivision(String countryIso2, String divisionCode, String divisionName, String geoString) {

@@ -2,10 +2,7 @@ package org.sds.sdslocation.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.sds.sdslocation.exeption.SdsLocationException;
-import org.sds.sdslocation.model.CountryDivision;
-import org.sds.sdslocation.model.PolygonGeometry;
-import org.sds.sdslocation.model.RegionSupportResponse;
-import org.sds.sdslocation.model.SubDivision;
+import org.sds.sdslocation.model.*;
 import org.sds.sdslocation.model.request.CountryDivisionRequest;
 import org.sds.sdslocation.model.request.CountryDivisionUpdateRequest;
 import org.sds.sdslocation.model.request.SubDivisionRequest;
@@ -13,6 +10,7 @@ import org.sds.sdslocation.model.request.SubDivisionUpdateRequest;
 import org.sds.sdslocation.repository.DataRepository;
 import org.sds.sdslocation.repository.TblCountryDivisions;
 import org.sds.sdslocation.repository.TblCountrySubDivisions;
+import org.sds.sdslocation.repository.TblDeviceLocation;
 import org.sds.sdslocation.utility.ULIDRef;
 import org.springframework.stereotype.Service;
 import tools.jackson.databind.ObjectMapper;
@@ -38,6 +36,13 @@ public class LocationServiceImpl {
     }
 
 
+    public UserLocation saveUserLocation(UserLocation location) {
+        return dataRepository.saveUserLocation(location.getDeviceId(), location.getUserId(), location.getLat(), location.getLon());
+    }
+
+    public List<TblDeviceLocation> getActiveUsers(Coordinates2D coordinates2D) {
+        return dataRepository.findNearbyUsers(coordinates2D.getLat(), coordinates2D.getLon());
+    }
 
     public CountryDivision updateDivision(String divisionCode, CountryDivisionUpdateRequest request, String updatedBy) {
         // Check if division exists
@@ -284,7 +289,7 @@ public class LocationServiceImpl {
     public SubDivision createSubDivision(SubDivisionRequest subDivision) {
         PolygonGeometry geom = subDivision.getPolygonGeometry();
 
-        if (!dataRepository.isCountryDivisionAvailable(subDivision.getDivisionId())){
+        if (!dataRepository.isCountryDivisionAvailable(subDivision.getDivisionId())) {
             throw new SdsLocationException("Division not available");
         }
 
@@ -301,7 +306,7 @@ public class LocationServiceImpl {
         );
 
         String geoJsonString = new ObjectMapper().writeValueAsString(geoJson);
-       return dataRepository.saveSubDivision(geoJsonString, subDivision.getDivisionId(), subDivision.getSubDivisionName());
+        return dataRepository.saveSubDivision(geoJsonString, subDivision.getDivisionId(), subDivision.getSubDivisionName());
     }
 
     public CountryDivision createDivision(CountryDivisionRequest request) {

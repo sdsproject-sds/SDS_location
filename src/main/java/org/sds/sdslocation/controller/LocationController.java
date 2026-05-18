@@ -2,10 +2,7 @@ package org.sds.sdslocation.controller;
 
 import com.sds.integration.commons.model.AbstractBaseApiResponse;
 import org.sds.sdslocation.exeption.SdsLocationException;
-import org.sds.sdslocation.model.Coordinates2D;
-import org.sds.sdslocation.model.CountryDivision;
-import org.sds.sdslocation.model.RegionSupportResponse;
-import org.sds.sdslocation.model.SubDivision;
+import org.sds.sdslocation.model.*;
 import org.sds.sdslocation.model.request.CountryDivisionRequest;
 import org.sds.sdslocation.model.request.CountryDivisionUpdateRequest;
 import org.sds.sdslocation.model.request.SubDivisionRequest;
@@ -32,6 +29,8 @@ class LocationController {
     public LocationController(LocationServiceImpl locationService) {
         this.locationService = locationService;
     }
+
+
 
     /**
      * Adding divisions
@@ -270,9 +269,9 @@ class LocationController {
      * Update subdivision by ID (partial update - only non-null fields)
      * PUT /location/subdivision/{id}
      *
-     * @param id the subdivision ID to update
+     * @param id            the subdivision ID to update
      * @param updateRequest the update request with fields to update
-     * @param updatedBy optional parameter to track who updated it
+     * @param updatedBy     optional parameter to track who updated it
      * @return updated subdivision or error response
      */
     @PutMapping(value = "/sub-division/{id}")

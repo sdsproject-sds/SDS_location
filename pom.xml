@@ -40,7 +40,6 @@
             <artifactId>sds-integration-commons</artifactId>
             <version>0.0.3</version>
         </dependency>
-
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jdbc</artifactId>
@@ -110,7 +109,6 @@
         </dependency>
 
     </dependencies>
-
     <dependencyManagement>
         <dependencies>
             <dependency>
@@ -230,5 +228,10 @@
             </plugin>
         </plugins>
     </build>
-
+    <repositories>
+        <repository>
+            <id>github</id>
+            <url>https://maven.pkg.github.com/sdsproject-sds/SDS_platform</url>
+        </repository>
+    </repositories>
 </project>
