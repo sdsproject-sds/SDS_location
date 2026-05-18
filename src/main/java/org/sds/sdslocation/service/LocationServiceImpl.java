@@ -2,10 +2,9 @@ package org.sds.sdslocation.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.sds.sdslocation.exeption.SdsLocationException;
-import org.sds.sdslocation.model.CountryDivision;
-import org.sds.sdslocation.model.PolygonGeometry;
-import org.sds.sdslocation.model.RegionSupportResponse;
-import org.sds.sdslocation.model.SubDivision;
+import org.sds.sdslocation.exeption.SdsLocationNotFoundException;
+import org.sds.sdslocation.model.*;
+import org.sds.sdslocation.model.CountryDivisionLookupResponse;
 import org.sds.sdslocation.model.request.CountryDivisionRequest;
 import org.sds.sdslocation.model.request.CountryDivisionUpdateRequest;
 import org.sds.sdslocation.model.request.SubDivisionRequest;
@@ -36,7 +35,6 @@ public class LocationServiceImpl {
     public LocationServiceImpl(DataRepository dataRepository) {
         this.dataRepository = dataRepository;
     }
-
 
 
     public CountryDivision updateDivision(String divisionCode, CountryDivisionUpdateRequest request, String updatedBy) {
@@ -88,19 +86,15 @@ public class LocationServiceImpl {
                     updatedBy != null ? updatedBy : "system"
             );
 
-            if (updated) {
-                // Return updated division
-                TblCountryDivisions updatedDivision = dataRepository.getDivisionById(divisionCode);
-                return updatedDivision != null ? updatedDivision.toCountryDivision() : null;
-            } else {
-                throw new SdsLocationException("No rows were updated. Division may not exist or be inactive.");
+            if (!updated) {
+                throw new SdsLocationException("Updated failed. Division may not exist or be inactive.");
             }
+
+            return dataRepository.getDivisionById(divisionCode)
+                    .toCountryDivision();
 
         } catch (Exception e) {
             log.error("Error updating division with code: {}", divisionCode, e);
-            if (e instanceof SdsLocationException) {
-                throw e;
-            }
             throw new SdsLocationException("Failed to update division: " + e.getMessage());
         }
     }
@@ -117,7 +111,7 @@ public class LocationServiceImpl {
 
             // Validate division exists if provided
             if (divisionCode != null && !dataRepository.isCountryDivisionAvailable(divisionCode)) {
-                throw new SdsLocationException("Division with code " + divisionCode + " not available");
+                throw new SdsLocationNotFoundException("Division with code " + divisionCode + " not available");
             }
 
             if (request.getPolygonGeometry() != null &&
@@ -160,9 +154,6 @@ public class LocationServiceImpl {
 
         } catch (Exception e) {
             log.error("Error updating sub-division with ID: {}", id, e);
-            if (e instanceof SdsLocationException) {
-                throw e;
-            }
             throw new SdsLocationException("Failed to update sub-division: " + e.getMessage());
         }
     }
@@ -172,48 +163,58 @@ public class LocationServiceImpl {
     }
 
 
-    public RegionSupportResponse getSubDivision(Double lon, Double lat) {
+    public SubDivisionLookupResponse getSubDivision(Double lon, Double lat) {
         List<TblCountrySubDivisions> regions = dataRepository.getSubDivision(lon, lat);
         if (!regions.isEmpty()) {
-            return RegionSupportResponse.builder()
-                    .locationArea(regions.get(0).getCountrySubDivisionName())
+            return SubDivisionLookupResponse.builder()
+                    .subDivision(regions.get(0).toSubDivision())
+                    .available(true)
                     .supported(true)
                     .build();
         }
-        return RegionSupportResponse.builder()
+        return SubDivisionLookupResponse.builder()
                 .supported(false)
                 .available(false)
                 .build();
     }
 
-    public RegionSupportResponse getDivision(Double lon, Double lat) {
+    public CountryDivisionLookupResponse getDivision(Double lon, Double lat) {
         List<TblCountryDivisions> regions = dataRepository.getDivision(lon, lat);
         if (!regions.isEmpty()) {
-            return RegionSupportResponse.builder()
-                    .locationArea(regions.get(0).getDivision())
+            return CountryDivisionLookupResponse.builder()
+                    .countryDivision(regions.get(0).toCountryDivision())
                     .available(true)
                     .supported(regions.get(0).isSupported())
                     .build();
         }
-        return RegionSupportResponse.builder()
+        return CountryDivisionLookupResponse.builder()
                 .supported(false)
                 .available(false)
                 .build();
     }
 
     public CountryDivision getDivisionById(String id) {
-        TblCountryDivisions division = dataRepository.getDivisionById(id);
-        return division != null ? division.toCountryDivision() : null;
+        try {
+            TblCountryDivisions division = dataRepository.getDivisionById(id);
+            return division.toCountryDivision();
+        } catch (Exception e) {
+            throw new SdsLocationException("Failed to retrieve division by ID: "+ id);
+        }
     }
 
     public SubDivision getSubDivisionById(Long id) {
-        return dataRepository.getSubDivisionById(id);
+        var subDivision = dataRepository.getSubDivisionById(id);
+
+        if (subDivision == null) {
+            throw new SdsLocationNotFoundException("Sub-division with ID " + id + " not found");
+        }
+        return subDivision;
     }
 
     public boolean deleteSubDivision(Long id, String deletedBy) {
         // Check if subdivision exists
         if (!dataRepository.subDivisionExists(id)) {
-            throw new SdsLocationException("Sub-division with ID " + id + " not found or already deleted");
+            throw new SdsLocationNotFoundException("Sub-division with ID " + id + " not found or already deleted");
         }
 
         try {
@@ -227,7 +228,7 @@ public class LocationServiceImpl {
     public boolean hardDeleteSubDivision(Long id) {
         // Check if subdivision exists first
         if (!dataRepository.subDivisionExists(id)) {
-            throw new SdsLocationException("Sub-division with ID " + id + " not found");
+            throw new SdsLocationNotFoundException("Sub-division with ID " + id + " not found");
         }
 
         try {
@@ -238,42 +239,46 @@ public class LocationServiceImpl {
         }
     }
 
-    public boolean deleteDivision(String divisionCode, String deletedBy) {
-        // Check if division exists
-        if (!dataRepository.divisionExists(divisionCode)) {
-            throw new SdsLocationException("Division with code " + divisionCode + " not found or already deleted");
-        }
-
-        // Check if there are active subdivisions
-        long activeSubDivisions = dataRepository.countActiveSubDivisions(divisionCode);
-        if (activeSubDivisions > 0) {
-            throw new SdsLocationException("Cannot delete division " + divisionCode +
-                    ". It has " + activeSubDivisions + " active sub-divisions. Please delete them first.");
-        }
-
+    public void deleteDivision(String divisionCode, String deletedBy) {
         try {
-            return dataRepository.deleteDivision(divisionCode, deletedBy);
+            // Check if division exists
+            if (!dataRepository.divisionExists(divisionCode)) {
+                throw new SdsLocationException("Division with code " + divisionCode + " not found or already deleted");
+            }
+
+            // Check if there are active subdivisions
+            long activeSubDivisions = dataRepository.countActiveSubDivisions(divisionCode);
+            if (activeSubDivisions > 0) {
+                throw new SdsLocationException("Cannot delete division " + divisionCode +
+                        ". It has " + activeSubDivisions + " active sub-divisions. Please delete them first.");
+            }
+
+            if (!dataRepository.deleteDivision(divisionCode, deletedBy)) {
+                throw new SdsLocationException("Failed to delete division with code "+ divisionCode);
+            }
         } catch (Exception e) {
             log.error("Error deleting division with code: {}", divisionCode, e);
             throw new SdsLocationException("Failed to delete division: " + e.getMessage());
         }
     }
 
-    public boolean hardDeleteDivision(String divisionCode) {
-        // Check if division exists
-        if (!dataRepository.divisionExists(divisionCode)) {
-            throw new SdsLocationException("Division with code " + divisionCode + " not found");
-        }
-
-        // Check if there are any subdivisions (active or inactive)
-        long totalSubDivisions = dataRepository.countActiveSubDivisions(divisionCode);
-        if (totalSubDivisions > 0) {
-            throw new SdsLocationException("Cannot permanently delete division " + divisionCode +
-                    ". It has " + totalSubDivisions + " sub-divisions. Delete them first.");
-        }
-
+    public void hardDeleteDivision(String divisionCode) {
         try {
-            return dataRepository.hardDeleteDivision(divisionCode);
+            // Check if division exists
+            if (!dataRepository.divisionExists(divisionCode)) {
+                throw new SdsLocationNotFoundException("Division with code " + divisionCode + " not found");
+            }
+
+            // Check if there are any subdivisions (active or inactive)
+            long totalSubDivisions = dataRepository.countActiveSubDivisions(divisionCode);
+            if (totalSubDivisions > 0) {
+                throw new SdsLocationException("Cannot permanently delete division " + divisionCode +
+                        ". It has " + totalSubDivisions + " sub-divisions. Delete them first.");
+            }
+
+            if (!dataRepository.hardDeleteDivision(divisionCode)) {
+                throw new SdsLocationException("Division with code " + divisionCode + " not found");
+            }
         } catch (Exception e) {
             log.error("Error hard deleting division with code: {}", divisionCode, e);
             throw new SdsLocationException("Failed to hard delete division: " + e.getMessage());
@@ -284,8 +289,8 @@ public class LocationServiceImpl {
     public SubDivision createSubDivision(SubDivisionRequest subDivision) {
         PolygonGeometry geom = subDivision.getPolygonGeometry();
 
-        if (!dataRepository.isCountryDivisionAvailable(subDivision.getDivisionId())){
-            throw new SdsLocationException("Division not available");
+        if (!dataRepository.isCountryDivisionAvailable(subDivision.getDivisionId())) {
+            throw new SdsLocationNotFoundException("Division not available");
         }
 
         List<List<List<Double>>> cleaned = geom.getCoordinates()
@@ -301,7 +306,7 @@ public class LocationServiceImpl {
         );
 
         String geoJsonString = new ObjectMapper().writeValueAsString(geoJson);
-       return dataRepository.saveSubDivision(geoJsonString, subDivision.getDivisionId(), subDivision.getSubDivisionName());
+        return dataRepository.saveSubDivision(geoJsonString, subDivision.getDivisionId(), subDivision.getSubDivisionName());
     }
 
     public CountryDivision createDivision(CountryDivisionRequest request) {

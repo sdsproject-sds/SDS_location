@@ -2,6 +2,7 @@ package org.sds.sdslocation.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 /**
  * @author samwel.wafula
@@ -10,12 +11,8 @@ import lombok.*;
  */
 @Getter
 @Setter
-@Builder
-@AllArgsConstructor
+@SuperBuilder
 @JsonInclude(JsonInclude.Include.NON_NULL)
-@NoArgsConstructor
-public class RegionSupportResponse {
-    private String locationArea;
-    private boolean supported;
-    private boolean available;
+public class CountryDivisionLookupResponse extends AbstractLocationCoverage {
+    private CountryDivision countryDivision;
 }
