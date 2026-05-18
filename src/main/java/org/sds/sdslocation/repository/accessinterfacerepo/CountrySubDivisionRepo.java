@@ -48,7 +48,10 @@ public interface CountrySubDivisionRepo extends CrudRepository<TblCountrySubDivi
 
 
     @Query("""
-                SELECT *
+                SELECT
+                  id, division_code, country_sub_division,
+                  ST_AsBinary(geom) as geom,
+                  status, created_at, updated_at, created_by, updated_by
                 FROM country_sub_divisions
                 WHERE ST_Intersects(
                     geom,
