@@ -39,8 +39,8 @@ public class LocationServiceImpl {
     }
 
 
-    public UserLocation saveUserLocation(UserLocation location) {
-        return dataRepository.saveUserLocation(location.getDeviceId(), location.getUserId(), location.getLat(), location.getLon());
+    public DeviceLocation saveUserLocation(DeviceLocation location) {
+        return dataRepository.saveUserLocation(location);
     }
 
     public List<TblDeviceLocation> getActiveUsers(Coordinates2D coordinates2D) {

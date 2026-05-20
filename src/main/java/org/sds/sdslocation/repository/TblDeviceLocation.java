@@ -1,11 +1,16 @@
 package org.sds.sdslocation.repository;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import java.util.Map;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.locationtech.jts.geom.Point;
 import org.sds.sdslocation.model.DeviceLocation;
+import org.sds.sdslocation.model.enums.DeviceStatus;
+import org.sds.sdslocation.model.enums.DeviceType;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
@@ -25,6 +30,8 @@ import java.util.Arrays;
 @Getter
 @Setter
 @Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class TblDeviceLocation {
     @Id
     @Column("device_id")
@@ -56,7 +63,7 @@ public class TblDeviceLocation {
     private String status;
 
     @Column("metadata")
-    private String metadata; // JSON string
+    private Map<String, Object> metadata; // JSON string
 
     @Column("supported_services")
     private String[] supportedServices; // PostgreSQL array
@@ -76,12 +83,12 @@ public class TblDeviceLocation {
         return DeviceLocation.builder()
                 .deviceId(this.deviceId)
                 .userId(this.userId)
-                .latitude(this.lat != null ? this.lat.doubleValue() : null)
-                .longitude(this.lon != null ? this.lon.doubleValue() : null)
+                .lat(this.lat != null ? this.lat.doubleValue() : null)
+                .lon(this.lon != null ? this.lon.doubleValue() : null)
                 .notificationToken(this.notificationToken)
-                .deviceType(this.deviceType)
+                .deviceType(DeviceType.valueOf(this.deviceType))
                 .accuracy(this.accuracy != null ? this.accuracy.doubleValue() : null)
-                .status(this.status)
+                .status(DeviceStatus.valueOf(this.status))
                 .metadata(this.metadata)
                 .supportedServices(this.supportedServices != null ? Arrays.asList(this.supportedServices) : null)
                 .createdAt(this.createdAt)
@@ -97,18 +104,18 @@ public class TblDeviceLocation {
                 .deviceId(deviceLocation.getDeviceId())
                 .userId(deviceLocation.getUserId())
                 .notificationToken(deviceLocation.getNotificationToken())
-                .deviceType(deviceLocation.getDeviceType())
-                .status(deviceLocation.getStatus())
+                .deviceType(String.valueOf(deviceLocation.getDeviceType()))
+                .status(String.valueOf(deviceLocation.getStatus()))
                 .metadata(deviceLocation.getMetadata())
                 .createdAt(deviceLocation.getCreatedAt())
                 .updatedAt(deviceLocation.getUpdatedAt()).build();
 
         // Handle coordinates
-        if (deviceLocation.getLatitude() != null) {
-            builder.setLat(BigDecimal.valueOf(deviceLocation.getLatitude()));
+        if (deviceLocation.getLat() != null) {
+            builder.setLat(BigDecimal.valueOf(deviceLocation.getLat()));
         }
-        if (deviceLocation.getLongitude() != null) {
-            builder.setLon(BigDecimal.valueOf(deviceLocation.getLongitude()));
+        if (deviceLocation.getLon() != null) {
+            builder.setLon(BigDecimal.valueOf(deviceLocation.getLon()));
         }
         if (deviceLocation.getAccuracy() != null) {
             builder.setAccuracy(BigDecimal.valueOf(deviceLocation.getAccuracy()));
