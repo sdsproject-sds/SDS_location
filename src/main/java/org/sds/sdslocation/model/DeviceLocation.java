@@ -1,10 +1,15 @@
 package org.sds.sdslocation.model;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
+import java.util.Map;
 import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import org.sds.sdslocation.model.enums.DeviceStatus;
+import org.sds.sdslocation.model.enums.DeviceType;
+import org.springframework.format.annotation.DateTimeFormat;
+import static org.sds.sdslocation.model.enums.DeviceStatus.AVAILABLE;
+import static org.sds.sdslocation.model.enums.DeviceStatus.ONLINE;
 
 @Getter
 @Setter
@@ -14,25 +19,25 @@ import java.util.List;
 public class DeviceLocation {
 
     private String deviceId;
-    private String userId; // Changed from specialistId to userId
-    private Double latitude;
-    private Double longitude;
-    private String notificationToken; // Consolidated FCM/APN tokens
-    private String deviceType; // ANDROID, IOS, WEB
+    private String userId;
+    private Double lat;
+    private Double lon;
+    private String notificationToken;
+    private DeviceType deviceType;
     private Double accuracy;
-    private String status; // AVAILABLE, OFFLINE, BUSY, ONLINE
-    private String metadata; // JSON string for additional data
-    private List<String> supportedServices; // Services this user/specialist supports
+    private DeviceStatus status;
+    private Map<String, Object> metadata;
+    private List<String> supportedServices;
 
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private LocalDateTime createdAt;
 
-    @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
+    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     private LocalDateTime updatedAt;
 
     // Convenience methods
     public boolean isAvailable() {
-        return "AVAILABLE".equalsIgnoreCase(status) || "ONLINE".equalsIgnoreCase(status);
+        return AVAILABLE.equals(status) || ONLINE.equals(status);
     }
 
     public boolean supportsService(String serviceType) {

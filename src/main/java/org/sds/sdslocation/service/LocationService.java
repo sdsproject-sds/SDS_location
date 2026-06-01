@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.sds.sdslocation.exeption.SdsLocationException;
 import org.sds.sdslocation.model.*;
 import org.sds.sdslocation.exeption.SdsLocationNotFoundException;
-import org.sds.sdslocation.model.*;
 import org.sds.sdslocation.model.CountryDivisionLookupResponse;
 import org.sds.sdslocation.model.request.CountryDivisionRequest;
 import org.sds.sdslocation.model.request.CountryDivisionUpdateRequest;
@@ -28,19 +27,19 @@ import java.util.Map;
  */
 @Service
 @Slf4j
-public class LocationServiceImpl {
+public class LocationService {
 
     public static final String POLYGON = "Polygon";
     public static final String COORDINATES = "coordinates";
     private final DataRepository dataRepository;
 
-    public LocationServiceImpl(DataRepository dataRepository) {
+    public LocationService(DataRepository dataRepository) {
         this.dataRepository = dataRepository;
     }
 
 
-    public UserLocation saveUserLocation(UserLocation location) {
-        return dataRepository.saveUserLocation(location.getDeviceId(), location.getUserId(), location.getLat(), location.getLon());
+    public DeviceLocation saveUserLocation(DeviceLocation location) {
+        return dataRepository.saveUserLocation(location);
     }
 
     public List<TblDeviceLocation> getActiveUsers(Coordinates2D coordinates2D) {

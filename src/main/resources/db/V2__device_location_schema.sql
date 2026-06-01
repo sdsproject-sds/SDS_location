@@ -1,4 +1,4 @@
-create TABLE IF NOT EXISTS user_locations
+create TABLE IF NOT EXISTS device_locations
 (
     device_id  TEXT      PRIMARY KEY       NOT NULL,
     user_id    VARCHAR(200)           NOT NULL,

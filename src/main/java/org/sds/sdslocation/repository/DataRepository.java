@@ -1,11 +1,13 @@
 package org.sds.sdslocation.repository;
 
+import java.util.Map;
 import org.sds.sdslocation.model.CountryDivision;
+import org.sds.sdslocation.model.DeviceLocation;
 import org.sds.sdslocation.model.SubDivision;
-import org.sds.sdslocation.model.UserLocation;
+import org.sds.sdslocation.model.enums.DeviceStatus;
 import org.sds.sdslocation.repository.accessinterfacerepo.CountryDivisionRepos;
 import org.sds.sdslocation.repository.accessinterfacerepo.CountrySubDivisionRepo;
-import org.sds.sdslocation.repository.accessinterfacerepo.UserLocationRepo;
+import org.sds.sdslocation.repository.accessinterfacerepo.DeviceLocationRepo;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -17,23 +19,35 @@ import java.util.List;
  */
 @Service
 public class DataRepository {
+
     private final CountryDivisionRepos countryDivision;
     private final CountrySubDivisionRepo countrySubDivisionRepo;
-    private final UserLocationRepo userLocationRepo;
+    private final DeviceLocationRepo deviceLocationRepo;
 
-    public DataRepository(CountryDivisionRepos countryDivision, CountrySubDivisionRepo countrySubDivisionRepo, UserLocationRepo userLocationRepo) {
+    public DataRepository(CountryDivisionRepos countryDivision, CountrySubDivisionRepo countrySubDivisionRepo, DeviceLocationRepo deviceLocationRepo) {
         this.countryDivision = countryDivision;
         this.countrySubDivisionRepo = countrySubDivisionRepo;
-        this.userLocationRepo = userLocationRepo;
+        this.deviceLocationRepo = deviceLocationRepo;
     }
 
-    public UserLocation saveUserLocation(String deviceId, String userId, double lat, double lon) {
-        return userLocationRepo.saveUserLocation(deviceId, userId, lat, lon)
-                .userLocation();
+    public DeviceLocation saveUserLocation(DeviceLocation location) {
+        return deviceLocationRepo.upsertDeviceLocation(
+                        location.getDeviceId(),
+                        location.getUserId(),
+                        location.getLat(),
+                        location.getLon(),
+                        location.getNotificationToken(),
+                        location.getDeviceType().name(),
+                        location.getAccuracy(),
+                        location.getStatus().name(),
+                        location.getMetadata(),
+                        location.getSupportedServices().toArray(String[]::new)
+                )
+                .toDeviceLocation();
     }
 
     public List<TblDeviceLocation> findNearbyUsers(double lat, double lon) {
-        return userLocationRepo.findNearbyUsers(lat, lon, 2000);
+        return deviceLocationRepo.findNearbyUsers(lat, lon, 2000.0);
     }
 
     public SubDivision saveSubDivision(String geoJson, String divisionCode, String subDivisionName) {
@@ -131,4 +145,115 @@ public class DataRepository {
         return countryDivision.findByDivisionCode(divisionCode).isPresent();
     }
 
+    /**
+     * Save or update device location (UPSERT)
+     */
+    public TblDeviceLocation saveDeviceLocation(String deviceId, String userId, Double lat, Double lon,
+                                                String notificationToken, String deviceType, Double accuracy,
+                                                String status, Map<String, Object> metadata, String[] supportedServices) {
+        return deviceLocationRepo.upsertDeviceLocation(
+                deviceId, userId, lat, lon, notificationToken,
+                deviceType, accuracy, status, metadata, supportedServices
+        );
+    }
+
+    /**
+     * Find device location by userId
+     */
+    public TblDeviceLocation findDeviceLocationByUserId(String userId) {
+        return deviceLocationRepo.findByUserId(userId).orElse(null);
+    }
+
+    /**
+     * Find device location by deviceId
+     */
+    public TblDeviceLocation findDeviceLocationByDeviceId(String deviceId) {
+        return deviceLocationRepo.findById(deviceId).orElse(null);
+    }
+
+    /**
+     * Find nearby users with service filtering (PostgresSQL fallback)
+     */
+    public List<TblDeviceLocation> findNearbyUsersWithService(Double latitude, Double longitude,
+                                                              Double radiusMeters,
+                                                              Integer maxResults, int timeoutMinutes) {
+        return deviceLocationRepo.findNearbyAvailableUsers(
+                latitude, longitude, radiusMeters,
+                timeoutMinutes, maxResults
+        );
+    }
+
+    /**
+     * Find users supporting a specific service
+     */
+    public List<TblDeviceLocation> findUsersByServiceType(String serviceType) {
+        return deviceLocationRepo.findByServiceType(serviceType);
+    }
+
+    /**
+     * Update user status
+     */
+    public boolean updateUserStatus(String userId, DeviceStatus status) {
+        int rowsAffected = deviceLocationRepo.updateUserStatus(userId, status.name());
+        return rowsAffected > 0;
+    }
+
+    /**
+     * Update device location coordinates only
+     */
+    public boolean updateDeviceCoordinates(String deviceId, Double lat, Double lon) {
+        int rowsAffected = deviceLocationRepo.updateCoordinates(deviceId, lat, lon);
+        return rowsAffected > 0;
+    }
+
+    /**
+     * Check if the device location exists
+     */
+    public boolean deviceLocationExists(String deviceId) {
+        return deviceLocationRepo.existsById(deviceId);
+    }
+
+    /**
+     * Check if a user has an active location
+     */
+    public boolean userHasActiveLocation(String userId) {
+        return deviceLocationRepo.existsActiveLocationByUserId(userId);
+    }
+
+    /**
+     * Clean up stale locations
+     */
+    public int deleteStaleDeviceLocations(int timeoutMinutes) {
+        return deviceLocationRepo.deleteStaleLocations(timeoutMinutes);
+    }
+
+    /**
+     * Count active users
+     */
+    public long countActiveUsers(String status, int timeoutMinutes) {
+        return deviceLocationRepo.countActiveUsers(status, timeoutMinutes);
+    }
+
+    /**
+     * Delete device location
+     */
+    public boolean deleteDeviceLocation(String deviceId) {
+        int rowsAffected = deviceLocationRepo.deleteByDeviceId(deviceId);
+        return rowsAffected > 0;
+    }
+
+    /**
+     * Get all device locations for a user (if multiple devices)
+     */
+    public List<TblDeviceLocation> findAllDeviceLocationsByUserId(String userId) {
+        return deviceLocationRepo.findAllByUserId(userId);
+    }
+
+    /**
+     * Update notification token
+     */
+    public boolean updateNotificationToken(String deviceId, String notificationToken) {
+        int rowsAffected = deviceLocationRepo.updateNotificationToken(deviceId, notificationToken);
+        return rowsAffected > 0;
+    }
 }
