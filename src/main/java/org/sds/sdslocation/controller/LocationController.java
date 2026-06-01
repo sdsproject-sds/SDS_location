@@ -6,7 +6,7 @@ import org.sds.sdslocation.model.request.CountryDivisionRequest;
 import org.sds.sdslocation.model.request.CountryDivisionUpdateRequest;
 import org.sds.sdslocation.model.request.SubDivisionRequest;
 import org.sds.sdslocation.model.request.SubDivisionUpdateRequest;
-import org.sds.sdslocation.service.LocationServiceImpl;
+import org.sds.sdslocation.service.LocationService;
 import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -21,9 +21,9 @@ import org.springframework.web.bind.annotation.*;
 class LocationController {
 
     public static final String SUCCESS = "Success";
-    private final LocationServiceImpl locationService;
+    private final LocationService locationService;
 
-    public LocationController(LocationServiceImpl locationService) {
+    public LocationController(LocationService locationService) {
         this.locationService = locationService;
     }
 

@@ -1,0 +1,52 @@
+syntax = "proto3";
+
+package org.sds.sdslocation.grpc;
+
+option java_multiple_files = true;
+option java_package = "org.sds.sdslocation.grpc";
+option java_outer_classname = "LocationProto";
+
+service LocationService {
+    rpc GetSubDivision(CoordinatesRequest) returns (SubDivisionResponse);
+    rpc GetDivision(CoordinatesRequest) returns (DivisionResponse);
+}
+
+message CoordinatesRequest {
+    double latitude = 1;
+    double longitude = 2;
+}
+
+message SubDivisionResponse {
+    bool available = 1;
+    bool supported = 2;
+    SubDivision subDivision = 3;
+}
+
+message SubDivision {
+    string subDivisionName = 1;
+    string divisionId = 2;
+    string subDivisionId = 3;
+    PolygonGeometry geometry = 4;
+}
+
+message DivisionResponse {
+    bool available = 1;
+    bool supported = 2;
+    Division division = 3;
+}
+
+message Division {
+    string countryCode = 1;
+    string division = 2;
+    string divisionId = 3;
+    PolygonGeometry geometry = 4;
+}
+
+message PolygonGeometry {
+    string type = 1;
+    repeated Coordinate coordinates = 2;
+}
+
+message Coordinate {
+    repeated double points = 1;
+}

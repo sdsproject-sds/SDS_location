@@ -12,7 +12,7 @@ spring:
   datasource:
     password: ${DB_PASSWORD:admin}
     username: ${DB_USERNAME:postgres}
-    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5434}/${DB_NAME:location}
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:7433}/${DB_NAME:sds_location}
   application:
     name: SDS-Location
 
